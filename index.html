@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ms Merriweather</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="temp">
+        <!--Temp -->
+      </h1>
+      <p id="desc">
+        <!-- description -->
+      </p>
+      <form id="form">
+        <input 
+          id="zip" 
+          type="number" 
+          placeholder="zip code"
+          title="Please Enter a valid Zip Code"
+          pattern="^\d{5}(?:[-\s]\d{4})?$"
+        >
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    <script type= "module">
+            // ------------------------------------------------------
+      // Developer Code
+
+      import getWeather from './index.js';  // Import the function
+      
+      // Get Element refererences
+      const tempEl = document.getElementById('temp')
+      const descEl = document.getElementById('desc')
+      const formEl = document.getElementById('form')
+      const zipInput = document.getElementById('zip')
+
+      // Define event listeners
+      formEl.addEventListener('submit', (e) => {
+        e.preventDefault()
+        const zip = zipInput.value
+        const apikey= '467355df4c808dd6134a3b64e9ace282'
+        getWeather(apikey, zip, tempEl, descEl)
+      })
+
+    </script>
+  </body>
+</html>
