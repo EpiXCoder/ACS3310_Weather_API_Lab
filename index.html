@@ -1,49 +1,104 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>Ms Merriweather</title>
     <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
+</head>
+
+<body>
     <div class="container">
-      <h1 id="temp">
-        <!--Temp -->
-      </h1>
-      <p id="desc">
-        <!-- description -->
-      </p>
-      <form id="form">
-        <input 
-          id="zip" 
-          type="number" 
-          placeholder="zip code"
-          title="Please Enter a valid Zip Code"
-          pattern="^\d{5}(?:[-\s]\d{4})?$"
-        >
-        <button type="submit">Search</button>
-      </form>
+        <img id="icon" src="" alt="Weather Icon" style="display: none; width: 100px; height: 100px; "">
+        <h1 id="temp">
+            <!--Temp -->
+        </h1>
+        <p id="desc">
+            <!-- description -->
+        </p>
+        <form id="form">
+            <select id="searchType">
+                <option value="zip">Zip Code</option>
+                <option value="city">City</option>
+                <option value="geo">Geolocation</option>
+            </select>
+            <input 
+                id="inputField" 
+                type="number" 
+                placeholder="zip code"
+                title="Please Enter a valid Zip Code"
+                pattern="^\d{5}(?:[-\s]\d{4})?$"
+            >
+            <select id="unit">
+                <option value="imperial">Fahrenheit</option>
+                <option value="metric">Celsius</option>
+            </select>
+            <button type="submit">Search</button>
+        </form>
+        <p id="geoExample" style="display:none;">Example: 40.7128,-74.0060</p>
     </div>
+    <script type="module">
+        // ------------------------------------------------------
+        // Developer Code
 
-    <script type= "module">
-            // ------------------------------------------------------
-      // Developer Code
+        import { getWeatherByZip, getWeatherByCity, getWeatherByGeo } from './index.js'; // Import the functions
 
-      import getWeather from './index.js';  // Import the function
-      
-      // Get Element refererences
-      const tempEl = document.getElementById('temp')
-      const descEl = document.getElementById('desc')
-      const formEl = document.getElementById('form')
-      const zipInput = document.getElementById('zip')
+        const tempEl = document.getElementById('temp');
+        const descEl = document.getElementById('desc');
+        const icon = document.getElementById('icon')
+        const formEl = document.getElementById('form');
+        const inputField = document.getElementById('inputField');
+        const searchType = document.getElementById('searchType');
+        const geoExample = document.getElementById('geoExample');
 
-      // Define event listeners
-      formEl.addEventListener('submit', (e) => {
-        e.preventDefault()
-        const zip = zipInput.value
-        const apikey= '467355df4c808dd6134a3b64e9ace282'
-        getWeather(apikey, zip, tempEl, descEl)
-      })
+        searchType.addEventListener('change', (e) => {
+            if(e.target.value === 'zip') {
+                inputField.setAttribute('type', 'number');
+                inputField.setAttribute('placeholder', 'Enter Zip Code');
+                inputField.setAttribute('pattern', '^\d{5}(?:[-\s]\d{4})?$');
+                geoExample.style.display = 'none';
+            } else if(e.target.value === 'city') {
+                inputField.setAttribute('type', 'text');
+                inputField.setAttribute('placeholder', 'Enter City Name');
+                inputField.removeAttribute('pattern');
+                geoExample.style.display = 'none';
+            } else {
+                inputField.setAttribute('type', 'text');
+                inputField.setAttribute('placeholder', 'Enter Lat,Long');
+                inputField.removeAttribute('pattern');
+                geoExample.style.display = 'block';
+            }
+        });
+
+        formEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const apikey = '467355df4c808dd6134a3b64e9ace282';
+            const unit = document.getElementById('unit').value; // Fetch selected unit
+            const searchMethod = searchType.value;
+            let data;
+
+            if (searchMethod === 'zip') {
+                data = await getWeatherByZip(apikey, inputField.value, unit);
+            } else if (searchMethod === 'city') {
+                data = await getWeatherByCity(apikey, inputField.value, unit);
+            } else {
+                const [lat, lon] = inputField.value.split(',');
+                data = await getWeatherByGeo(apikey, lat.trim(), lon.trim(), unit);
+            }
+
+            if (data) {
+                console.log(data); 
+                const unitSymbol = unit === "metric" ? "°C" : "°F";
+                tempEl.innerHTML = `${data.temperature} ${unitSymbol}`;
+                descEl.innerHTML = data.description;
+                icon.style.display = 'block';
+                icon.src = `https://openweathermap.org/img/wn/${data.icon}@2x.png`
+            }
+        });
 
     </script>
-  </body>
+</body>
+
 </html>
+
+
+
